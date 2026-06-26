@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ScorePal · Das Glücksrad</title>
+<style>
+  :root {
+    --black:#000;
+    --white:#fff;
+    --brand:#697959;
+    --field:#B3B9AF;
+    --card:#E0DDDC;
+    --warning:#a2382d;
+    --accent:#d9913d;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family: Bahnschrift, Arial, sans-serif;
+    background:var(--white);
+    color:var(--black);
+    min-height:100vh;
+    padding:16px;
+    line-height:1.35;
+  }
+  .container { max-width:760px; margin:0 auto; }
+  header {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:12px;
+    border-bottom:3px solid var(--black);
+    padding-bottom:14px;
+    margin-bottom:16px;
+  }
+  .brand-kicker { font-size:15px; color:var(--brand); font-weight:700; margin-bottom:8px; }
+  .brand-title {
+    font-family:"Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif;
+    font-size:44px;
+    font-weight:700;
+    text-transform:uppercase;
+    line-height:.95;
+  }
+  .brand-sub { display:block; color:var(--brand); font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-top:10px; }
+  .btn {
+    border:2px solid var(--black);
+    background:var(--brand);
+    color:var(--white);
+    border-radius:6px;
+    padding:12px 16px;
+    font-family:inherit;
+    font-weight:800;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    cursor:pointer;
+    min-height:44px;
+  }
+  .btn:hover:not(:disabled) { filter:brightness(.95); }
+  .btn:disabled { opacity:.45; cursor:not-allowed; }
+  .btn-ghost { background:var(--white); color:var(--black); }
+  details.rules, .panel, .result-panel, .tracker-panel, .final-panel {
+    background:var(--white);
+    border:2px solid var(--black);
+    border-radius:8px;
+    box-shadow:4px 4px 0 var(--black);
+    padding:16px;
+    margin-bottom:16px;
+  }
+  details.rules summary {
+    cursor:pointer;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:1px;
+  }
+  details.rules ol, details.rules ul { margin:10px 0 0 20px; }
+  details.rules li { margin:6px 0; }
+  .section-title {
+    font-family:"Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif;
+    font-size:28px;
+    font-weight:700;
+    text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .setup-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .field label {
+    display:block;
+    color:var(--brand);
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  input, select {
+    width:100%;
+    border:2px solid var(--field);
+    border-radius:5px;
+    padding:12px;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:700;
+    background:var(--white);
+    color:var(--black);
+  }
+  input:focus, select:focus { outline:none; border-color:var(--black); }
+  .wheel-stage {
+    background:var(--card);
+    border:2px solid var(--black);
+    border-radius:8px;
+    box-shadow:4px 4px 0 var(--black);
+    padding:18px;
+    margin-bottom:16px;
+    text-align:center;
+  }
+  .wheel-wrap {
+    position:relative;
+    width:min(88vw,420px);
+    aspect-ratio:1;
+    margin:8px auto 18px;
+  }
+  .pointer {
+    position:absolute;
+    top:-8px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:18px solid transparent;
+    border-right:18px solid transparent;
+    border-top:34px solid var(--black);
+    z-index:3;
+  }
+  .wheel {
+    position:absolute;
+    inset:0;
+    border:5px solid var(--black);
+    border-radius:50%;
+    box-shadow:0 8px 0 rgba(0,0,0,.18);
+    transition:none;
+  }
+  .wheel::after {
+    content:"";
+    position:absolute;
+    inset:42%;
+    border-radius:50%;
+    background:var(--black);
+    border:6px solid var(--white);
+  }
+  .wheel-label {
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:96px;
+    margin-left:-48px;
+    margin-top:-12px;
+    font-size:16px;
+    font-weight:900;
+    text-transform:uppercase;
+    text-align:center;
+    transform-origin:50% 12px;
+    color:var(--black);
+    text-shadow:0 1px 0 rgba(255,255,255,.45);
+    pointer-events:none;
+  }
+  .spin-controls { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+  .result-panel { text-align:center; }
+  .result-text { color:var(--brand); font-size:14px; font-weight:700; max-width:560px; margin:0 auto 16px; }
+  .tracker-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:18px; }
+  .tracker-tile { background:var(--brand); color:var(--white); border-radius:6px; padding:12px; text-align:center; }
+  .tracker-tile strong { display:block; font-family:"Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif; font-size:34px; line-height:1; }
+  .tracker-tile span { display:block; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; margin-bottom:4px; }
+  .attempt-actions { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:8px; }
+  .scorecard-list { display:grid; gap:6px; margin-top:16px; }
+  .scorecard-row { display:grid; grid-template-columns:72px 1fr auto; gap:10px; align-items:center; border-bottom:1px solid var(--field); padding:8px 0; font-size:14px; }
+  .scorecard-row strong { font-size:14px; }
+  .scorecard-row.success .scorecard-status { color:var(--brand); }
+  .scorecard-row.miss .scorecard-status { color:var(--warning); }
+  .scorecard-status { font-weight:900; text-transform:uppercase; white-space:nowrap; }
+  .final-panel { text-align:center; }
+  .analysis-grid { display:grid; gap:8px; margin-top:14px; text-align:left; }
+  .analysis-row { display:grid; grid-template-columns:1fr 80px 90px; gap:10px; align-items:center; border-bottom:1px solid var(--field); padding:8px 0; font-size:14px; }
+  .analysis-row strong, .analysis-row span:last-child { font-weight:900; }
+  .analysis-note { color:var(--brand); font-weight:800; margin-top:12px; }
+  .club-editor { margin-top:14px; border-top:1px dashed var(--field); padding-top:12px; }
+  .club-list { display:grid; gap:8px; margin-top:8px; }
+  .club-row { display:grid; grid-template-columns:1fr 44px; gap:8px; align-items:center; }
+  .icon-btn { min-width:44px; width:44px; padding:0; background:var(--white); color:var(--black); }
+  .hint { color:var(--brand); font-size:13px; font-weight:700; margin-top:8px; }
+  @media (max-width:620px) {
+    body { padding:12px; }
+    header { align-items:flex-start; flex-direction:column; }
+    .brand-title { font-size:34px; }
+    .setup-grid, .tracker-grid, .scorecard-row, .analysis-row { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <div class="brand-kicker">ScorePal Scoringboard</div>
+      <h1 class="brand-title">Das Glücksrad</h1>
+      <span class="brand-sub">Einzel · 9 oder 18 Loch · Annäherungs-Challenge</span>
+    </div>
+    <button class="btn btn-ghost" id="resetBtn" type="button">Neue Runde</button>
+  </header>
+
+  <details class="rules" open>
+    <summary>So funktioniert's</summary>
+    <ol>
+      <li>Spiele eine normale Runde über 9 oder 18 Löcher.</li>
+      <li>Immer wenn du das Grün nicht triffst, drehst du das Glücksrad.</li>
+      <li>Hölzer und Putter sind ausgeschlossen. Das Rad bestimmt den Schläger für die Annäherung.</li>
+      <li>Spiele den Schlag mit vollem Commitment, auch wenn der Schläger ungewohnt wirkt.</li>
+      <li>Ziel der Auswertung: Wie viele Up-and-Downs schaffst du?</li>
+    </ol>
+  </details>
+
+  <section class="panel">
+    <h2 class="section-title">Setup</h2>
+    <div class="setup-grid">
+      <div class="field">
+        <label for="playerName">Spieler</label>
+        <input id="playerName" type="text" placeholder="Name" value="Anja">
+      </div>
+      <div class="field">
+        <label for="roundLength">Runde</label>
+        <select id="roundLength">
+          <option value="9">9 Löcher</option>
+          <option value="18" selected>18 Löcher</option>
+        </select>
+      </div>
+    </div>
+    <div class="club-editor">
+      <details>
+        <summary><strong>Liste der Schläger bearbeiten</strong></summary>
+        <p class="hint">Standard: Eisen und Wedges. Hölzer und Putter sind laut Regel ausgeschlossen.</p>
+        <div class="club-list" id="clubList"></div>
+        <button class="btn btn-ghost" id="addClubBtn" type="button">Schläger hinzufügen</button>
+      </details>
+    </div>
+  </section>
+
+  <section class="wheel-stage">
+    <div class="wheel-wrap">
+      <div class="pointer"></div>
+      <div class="wheel" id="wheel"></div>
+    </div>
+    <div class="spin-controls">
+      <button class="btn" id="spinBtn" type="button">Rad drehen</button>
+    </div>
+  </section>
+
+
+  <section class="result-panel">
+    <h2 class="section-title">Ergebnis</h2>
+    <p class="result-text">Die Zählung ist optional und hilft dir bei der Auswertung der Runde. Außerdem behältst du so einen Überblick über deinen Fortschritt.</p>
+    <div class="attempt-actions">
+      <button class="btn" id="successBtn" type="button">Up & Down geschafft</button>
+      <button class="btn btn-ghost" id="missBtn" type="button">Nicht geschafft</button>
+    </div>
+  </section>
+
+  <section class="tracker-panel">
+    <h2 class="section-title">Up & Down Übersicht</h2>
+    <div class="tracker-grid">
+      <div class="tracker-tile"><span>Versuche</span><strong id="attemptCount">0</strong></div>
+      <div class="tracker-tile"><span>Geschafft</span><strong id="successCount">0</strong></div>
+      <div class="tracker-tile"><span>Quote</span><strong id="successRate">0%</strong></div>
+    </div>
+    <div class="scorecard-list" id="scorecardList"></div>
+  </section>
+
+  <section class="final-panel" id="finalPanel"></section>
+</div>
+
+<script>
+const STORAGE_KEY = 'scorepal_gluecksrad_v2';
+const DEFAULT_CLUBS = ['Eisen 5', 'Eisen 6', 'Eisen 7', 'Eisen 8', 'Eisen 9', 'PW', 'GW', 'SW', 'LW'];
+const COLORS = ['#697959', '#B3B9AF', '#E0DDDC', '#d9913d', '#ffffff', '#87937d', '#c8c1bd', '#f0efed', '#b7a27d'];
+let state = {
+  playerName: 'Anja',
+  roundLength: '18',
+  clubs: [...DEFAULT_CLUBS],
+  selectedClub: '',
+  rotation: 0,
+  spinning: false,
+  attempts: []
+};
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch (e) {}
+  if (!Array.isArray(state.clubs) || !state.clubs.length) state.clubs = [...DEFAULT_CLUBS];
+  if (!Array.isArray(state.attempts)) state.attempts = [];
+  state.attempts = state.attempts.map((attempt, idx) => typeof attempt === 'boolean' ? { nr: idx + 1, club: 'Nicht dokumentiert', success: attempt } : { nr: idx + 1, club: attempt.club || 'Nicht dokumentiert', success: !!attempt.success });
+}
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+}
+function segmentAngle() { return 360 / state.clubs.length; }
+function wheelBackground() {
+  const step = segmentAngle();
+  return `conic-gradient(${state.clubs.map((_, idx) => `${COLORS[idx % COLORS.length]} ${idx * step}deg ${(idx + 1) * step}deg`).join(',')})`;
+}
+function renderWheel() {
+  const wheel = document.getElementById('wheel');
+  wheel.style.background = wheelBackground();
+  wheel.style.transform = `rotate(${state.rotation}deg)`;
+  wheel.querySelectorAll('.wheel-label').forEach(el => el.remove());
+  const radius = 39;
+  const step = segmentAngle();
+  state.clubs.forEach((club, idx) => {
+    const label = document.createElement('div');
+    label.className = 'wheel-label';
+    const angle = idx * step + step / 2;
+    label.style.transform = `rotate(${angle}deg) translateY(-${radius}vw) rotate(90deg)`;
+    label.style.transform = `rotate(${angle}deg) translateY(-160px) rotate(90deg)`;
+    label.textContent = club;
+    wheel.appendChild(label);
+  });
+}
+function renderSetup() {
+  document.getElementById('playerName').value = state.playerName || '';
+  document.getElementById('roundLength').value = state.roundLength || '18';
+  document.getElementById('playerName').oninput = e => { state.playerName = e.target.value; saveState(); };
+  document.getElementById('roundLength').onchange = e => { state.roundLength = e.target.value; saveState(); };
+  renderClubList();
+}
+function renderClubList() {
+  const list = document.getElementById('clubList');
+  list.innerHTML = state.clubs.map((club, idx) => `
+    <div class="club-row">
+      <input type="text" value="${escapeHtml(club)}" data-club="${idx}" placeholder="Schläger">
+      <button class="btn icon-btn removeClub" data-club="${idx}" type="button" ${state.clubs.length <= 2 ? 'disabled' : ''}>-</button>
+    </div>
+  `).join('');
+  list.querySelectorAll('input').forEach(input => {
+    input.oninput = e => {
+      state.clubs[Number(e.target.dataset.club)] = e.target.value.trim() || `Schläger ${Number(e.target.dataset.club) + 1}`;
+      saveState();
+      renderWheel();
+    };
+  });
+  list.querySelectorAll('.removeClub').forEach(button => {
+    button.onclick = () => {
+      state.clubs.splice(Number(button.dataset.club), 1);
+      if (!state.clubs.includes(state.selectedClub)) state.selectedClub = '';
+      saveState();
+      render();
+    };
+  });
+  document.getElementById('addClubBtn').onclick = () => {
+    state.clubs.push('Neuer Schläger');
+    saveState();
+    render();
+  };
+}
+function roundTarget() { return Number(state.roundLength) || 18; }
+function isRoundComplete() { return state.attempts.length >= roundTarget(); }
+function renderTracker() {
+  const attempts = state.attempts.length;
+  const successes = state.attempts.filter(attempt => attempt.success).length;
+  const rate = attempts ? Math.round(successes / attempts * 100) : 0;
+  document.getElementById('attemptCount').textContent = `${attempts}/${roundTarget()}`;
+  document.getElementById('successCount').textContent = successes;
+  document.getElementById('successRate').textContent = `${rate}%`;
+  renderScorecard();
+  renderFinalAnalysis();
+  renderResultButtons();
+}
+function renderResultButtons() {
+  const disabled = !state.selectedClub || isRoundComplete();
+  document.getElementById('successBtn').disabled = disabled;
+  document.getElementById('missBtn').disabled = disabled;
+}
+function renderScorecard() {
+  const list = document.getElementById('scorecardList');
+  if (!state.attempts.length) {
+    list.innerHTML = '<p class="hint">Noch kein Eintrag. Drehe das Rad und dokumentiere danach, ob das Up & Down geschafft wurde.</p>';
+    return;
+  }
+  list.innerHTML = state.attempts.map(attempt => `
+    <div class="scorecard-row ${attempt.success ? 'success' : 'miss'}">
+      <strong>Loch ${attempt.nr}</strong>
+      <span>${escapeHtml(attempt.club)}</span>
+      <span class="scorecard-status">${attempt.success ? 'geschafft' : 'nicht geschafft'}</span>
+    </div>
+  `).join('');
+}
+function clubStats() {
+  const stats = new Map();
+  state.attempts.forEach(attempt => {
+    if (!stats.has(attempt.club)) stats.set(attempt.club, { club: attempt.club, attempts: 0, successes: 0 });
+    const row = stats.get(attempt.club);
+    row.attempts++;
+    if (attempt.success) row.successes++;
+  });
+  return [...stats.values()].sort((a, b) => (b.successes / b.attempts) - (a.successes / a.attempts) || b.attempts - a.attempts || a.club.localeCompare(b.club));
+}
+function renderFinalAnalysis() {
+  const panel = document.getElementById('finalPanel');
+  if (!isRoundComplete()) {
+    panel.innerHTML = '';
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = '';
+  const rows = clubStats().map(row => {
+    const rate = Math.round(row.successes / row.attempts * 100);
+    return `<div class="analysis-row"><strong>${escapeHtml(row.club)}</strong><span>${row.successes}/${row.attempts}</span><span>${rate}%</span></div>`;
+  }).join('');
+  const total = state.attempts.length;
+  const successes = state.attempts.filter(attempt => attempt.success).length;
+  panel.innerHTML = `<h2 class="section-title">Finale Auswertung</h2><p class="analysis-note">${successes} von ${total} Up & Downs geschafft.</p><div class="analysis-grid">${rows}</div><p class="analysis-note">Die Übersicht zeigt, mit welchen Schlägern du am stärksten warst und welche Schläger du gezielt üben solltest.</p>`;
+}
+function recordAttempt(success) {
+  if (isRoundComplete()) {
+    alert('Die Runde ist bereits abgeschlossen. Starte eine neue Runde, wenn du weiter testen möchtest.');
+    return;
+  }
+  if (!state.selectedClub) {
+    alert('Bitte zuerst das Rad drehen.');
+    return;
+  }
+  state.attempts.push({ nr: state.attempts.length + 1, club: state.selectedClub, success });
+  state.selectedClub = '';
+  saveState();
+  renderTracker();
+}
+function spinWheel() {
+  if (state.spinning || state.clubs.length < 2) return;
+  state.spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  const winningIndex = Math.floor(Math.random() * state.clubs.length);
+  const winningClub = state.clubs[winningIndex];
+  const step = segmentAngle();
+  const targetCenter = winningIndex * step + step / 2;
+  const current = state.rotation;
+  const currentNormalized = ((current % 360) + 360) % 360;
+  const desiredRotation = ((-targetCenter % 360) + 360) % 360;
+  const fullSpins = 5 + Math.floor(Math.random() * 3);
+  const delta = ((desiredRotation - currentNormalized + 360) % 360) + fullSpins * 360;
+  const targetRotation = current + delta;
+  const duration = 3200;
+  const start = performance.now();
+  const startRotation = current;
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function frame(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    state.rotation = startRotation + delta * easeOutCubic(progress);
+    renderWheel();
+    if (progress < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      state.rotation = targetRotation % 360;
+      state.selectedClub = winningClub;
+      state.spinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      saveState();
+      render();
+    }
+  }
+  requestAnimationFrame(frame);
+}
+function resetRound() {
+  if (!confirm('Neue Glücksrad-Runde starten? Aktuelle Drehung und Auswertung werden gelöscht.')) return;
+  state.selectedClub = '';
+  state.rotation = 0;
+  state.attempts = [];
+  saveState();
+  render();
+}
+function render() {
+  renderSetup();
+  renderWheel();
+  renderTracker();
+}
+
+document.getElementById('spinBtn').onclick = spinWheel;
+document.getElementById('successBtn').onclick = () => recordAttempt(true);
+document.getElementById('missBtn').onclick = () => recordAttempt(false);
+document.getElementById('resetBtn').onclick = resetRound;
+loadState();
+render();
+</script>
+</body>
+</html>
