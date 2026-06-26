@@ -1,4 +1,4 @@
-const CACHE_NAME = "scorepal-flugkurven-bingo-v2";
+const CACHE_NAME = "scorepal-gluecksrad-v2";
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
