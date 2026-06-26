@@ -1,7 +1,7 @@
 {
-  "name": "ScorePal - Das Gluecksrad",
-  "short_name": "Gluecksrad",
-  "description": "Offline testbares ScorePal Gluecksrad fuer Annäherungsschläge.",
+  "name": "ScorePal - Das Flugkurven Bingo",
+  "short_name": "Flugkurven Bingo",
+  "description": "Offline testbarer ScorePal Prototyp fuer Das Flugkurven Bingo.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
