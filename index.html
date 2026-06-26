@@ -169,6 +169,7 @@
   .tracker-tile strong { display:block; font-family:"Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif; font-size:34px; line-height:1; }
   .tracker-tile span { display:block; font-size:11px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; margin-bottom:4px; }
   .attempt-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; max-width:560px; margin:8px auto 0; }
+  .attempt-actions.three-actions { grid-template-columns:repeat(3,minmax(0,1fr)); max-width:720px; }
   .attempt-actions .btn { width:100%; }
   .scorecard-list { display:grid; gap:6px; margin-top:16px; }
   .scorecard-row { display:grid; grid-template-columns:58px minmax(70px,1fr) auto; gap:8px; align-items:center; border-bottom:1px solid var(--field); padding:8px 0; font-size:14px; }
@@ -195,7 +196,7 @@
     .wheel-stage { padding:14px 10px; }
     .wheel-wrap { width:min(84vw,340px); margin-top:12px; }
     .wheel-label { width:68px; font-size:13px; }
-    .attempt-actions { gap:8px; }
+    .attempt-actions, .attempt-actions.three-actions { grid-template-columns:1fr; gap:8px; }
     .attempt-actions .btn { font-size:12px; padding:10px 8px; letter-spacing:.5px; }
     .scorecard-row { grid-template-columns:48px minmax(58px,1fr) auto; gap:6px; font-size:12px; }
     .scorecard-row strong { font-size:12px; }
@@ -219,11 +220,14 @@
     <summary>So funktioniert's</summary>
     <ol>
       <li>Spiele eine normale Runde über 9 oder 18 Löcher.</li>
-      <li>Optional auch auf der Übungsanlage möglich.</li>
-      <li>Immer wenn du das Grün nicht triffst, drehst du das Glücksrad.</li>
-      <li>Hölzer und Putter sind ausgeschlossen. Das Rad bestimmt den Schläger für die Annäherung.</li>
+      <li>Optional auch auf der Übungsanlage möglich. Suche dir dazu 9-18 Positionen rund ums Grün für eine platzgetreue Simulation.</li>
+      <li>Grün getroffen bedeutet standardmäßig Green in Regulation: Par 3 mit dem 1. Schlag, Par 4 spätestens mit dem 2. Schlag, Par 5 spätestens mit dem 3. Schlag.</li>
+      <li>Wenn du das Grün nicht triffst, drehst du das Glücksrad.</li>
+      <li>Wenn du noch selten regulär Grüns triffst, lege vor der Runde deine eigene Regel fest, z. B. Glücksrad bei Annäherungen &lt;20 m rund ums Grün. Hier kannst du ganz nach deinen eigenen Regeln spielen, damit es für dich sinnvoll und zielführend ist.</li>
+      <li>Putter und Hölzer sind der Einfachheit halber ausgenommen. Das Rad bestimmt den Schläger für die Annäherung. Du kannst die Schläger allerdings jederzeit nach deinen Maßstäben anpassen und begrenzen - siehe dazu "Liste der Schläger bearbeiten" zum Entfernen, Hinzufügen oder Bearbeiten.</li>
       <li>Spiele den Schlag mit vollem Commitment, auch wenn der Schläger ungewohnt wirkt.</li>
-      <li>Ziel der Auswertung: Wie viele Up-and-Downs schaffst du?</li>
+      <li>Ein Up & Down bedeutet: Du verfehlst das Grün, spielst deine Annäherung aufs Grün und lochst danach mit nur einem Putt ein.</li>
+      <li>Ziel der Auswertung: Wie viele Up & Downs schaffst du?</li>
     </ol>
   </details>
 
@@ -266,7 +270,8 @@
   <section class="result-panel">
     <h2 class="section-title">Ergebnis</h2>
     <p class="result-text">Die Zählung ist optional und hilft dir bei der Auswertung der Runde. Außerdem behältst du so einen Überblick über deinen Fortschritt.</p>
-    <div class="attempt-actions">
+    <div class="attempt-actions three-actions">
+      <button class="btn btn-ghost" id="greenHitBtn" type="button">Grün getroffen</button>
       <button class="btn" id="successBtn" type="button">Up & Down geschafft</button>
       <button class="btn btn-ghost" id="missBtn" type="button">Nicht geschafft</button>
     </div>
@@ -275,9 +280,9 @@
   <section class="tracker-panel">
     <h2 class="section-title">Up & Down Übersicht</h2>
     <div class="tracker-grid">
-      <div class="tracker-tile"><span>Versuche</span><strong id="attemptCount">0</strong></div>
-      <div class="tracker-tile"><span>Geschafft</span><strong id="successCount">0</strong></div>
-      <div class="tracker-tile"><span>Quote</span><strong id="successRate">0%</strong></div>
+      <div class="tracker-tile"><span>Löcher</span><strong id="attemptCount">0</strong></div>
+      <div class="tracker-tile"><span>Grün getroffen</span><strong id="greenHitCount">0</strong></div>
+      <div class="tracker-tile"><span>Up & Down</span><strong id="successRate">0/0</strong></div>
     </div>
     <div class="scorecard-list" id="scorecardList"></div>
   </section>
@@ -286,7 +291,7 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'scorepal_gluecksrad_v2';
+const STORAGE_KEY = 'scorepal_gluecksrad_v3';
 const DEFAULT_CLUBS = ['Eisen 5', 'Eisen 6', 'Eisen 7', 'Eisen 8', 'Eisen 9', 'PW', 'GW', 'SW', 'LW'];
 const COLORS = ['#697959', '#B3B9AF', '#E0DDDC', '#d9913d', '#ffffff', '#87937d', '#c8c1bd', '#f0efed', '#b7a27d'];
 let state = {
@@ -309,7 +314,11 @@ function loadState() {
   } catch (e) {}
   if (!Array.isArray(state.clubs) || !state.clubs.length) state.clubs = [...DEFAULT_CLUBS];
   if (!Array.isArray(state.attempts)) state.attempts = [];
-  state.attempts = state.attempts.map((attempt, idx) => typeof attempt === 'boolean' ? { nr: idx + 1, club: 'Nicht dokumentiert', success: attempt } : { nr: idx + 1, club: attempt.club || 'Nicht dokumentiert', success: !!attempt.success });
+  state.attempts = state.attempts.map((attempt, idx) => {
+    if (typeof attempt === 'boolean') return { nr: idx + 1, type: 'missed-green', club: 'Nicht dokumentiert', success: attempt };
+    const type = attempt.type || 'missed-green';
+    return { nr: idx + 1, type, club: attempt.club || '', success: !!attempt.success };
+  });
 }
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
@@ -377,39 +386,50 @@ function renderClubList() {
 }
 function roundTarget() { return Number(state.roundLength) || 18; }
 function isRoundComplete() { return state.attempts.length >= roundTarget(); }
+function missedGreenAttempts() { return state.attempts.filter(attempt => attempt.type === 'missed-green'); }
+function greenHits() { return state.attempts.filter(attempt => attempt.type === 'green-hit'); }
+function roundTarget() { return Number(state.roundLength) || 18; }
+function isRoundComplete() { return state.attempts.length >= roundTarget(); }
 function renderTracker() {
-  const attempts = state.attempts.length;
-  const successes = state.attempts.filter(attempt => attempt.success).length;
-  const rate = attempts ? Math.round(successes / attempts * 100) : 0;
-  document.getElementById('attemptCount').textContent = `${attempts}/${roundTarget()}`;
-  document.getElementById('successCount').textContent = successes;
-  document.getElementById('successRate').textContent = `${rate}%`;
+  const holes = state.attempts.length;
+  const missed = missedGreenAttempts();
+  const successes = missed.filter(attempt => attempt.success).length;
+  document.getElementById('attemptCount').textContent = `${holes}/${roundTarget()}`;
+  document.getElementById('greenHitCount').textContent = greenHits().length;
+  document.getElementById('successRate').textContent = `${successes}/${missed.length}`;
   renderScorecard();
   renderFinalAnalysis();
   renderResultButtons();
 }
 function renderResultButtons() {
-  const disabled = !state.selectedClub || isRoundComplete();
-  document.getElementById('successBtn').disabled = disabled;
-  document.getElementById('missBtn').disabled = disabled;
+  const complete = isRoundComplete();
+  document.getElementById('greenHitBtn').disabled = complete;
+  const needsClub = !state.selectedClub || complete;
+  document.getElementById('successBtn').disabled = needsClub;
+  document.getElementById('missBtn').disabled = needsClub;
 }
 function renderScorecard() {
   const list = document.getElementById('scorecardList');
   if (!state.attempts.length) {
-    list.innerHTML = '<p class="hint">Noch kein Eintrag. Drehe das Rad und dokumentiere danach, ob das Up & Down geschafft wurde.</p>';
+    list.innerHTML = '<p class="hint">Noch kein Eintrag. Trage pro Loch Grün getroffen ein oder drehe bei verfehltem Grün das Rad.</p>';
     return;
   }
-  list.innerHTML = state.attempts.map(attempt => `
-    <div class="scorecard-row ${attempt.success ? 'success' : 'miss'}">
-      <strong>Loch ${attempt.nr}</strong>
-      <span>${escapeHtml(attempt.club)}</span>
-      <span class="scorecard-status">${attempt.success ? 'geschafft' : 'nicht geschafft'}</span>
-    </div>
-  `).join('');
+  list.innerHTML = state.attempts.map(attempt => {
+    if (attempt.type === 'green-hit') {
+      return `<div class="scorecard-row success"><strong>Loch ${attempt.nr}</strong><span>Grün getroffen</span><span class="scorecard-status">GIR</span></div>`;
+    }
+    return `
+      <div class="scorecard-row ${attempt.success ? 'success' : 'miss'}">
+        <strong>Loch ${attempt.nr}</strong>
+        <span>${escapeHtml(attempt.club)}</span>
+        <span class="scorecard-status">${attempt.success ? 'geschafft' : 'nicht geschafft'}</span>
+      </div>
+    `;
+  }).join('');
 }
 function clubStats() {
   const stats = new Map();
-  state.attempts.forEach(attempt => {
+  missedGreenAttempts().forEach(attempt => {
     if (!stats.has(attempt.club)) stats.set(attempt.club, { club: attempt.club, attempts: 0, successes: 0 });
     const row = stats.get(attempt.club);
     row.attempts++;
@@ -425,13 +445,24 @@ function renderFinalAnalysis() {
     return;
   }
   panel.style.display = '';
+  const missed = missedGreenAttempts();
+  const successes = missed.filter(attempt => attempt.success).length;
   const rows = clubStats().map(row => {
     const rate = Math.round(row.successes / row.attempts * 100);
     return `<div class="analysis-row"><strong>${escapeHtml(row.club)}</strong><span>${row.successes}/${row.attempts}</span><span>${rate}%</span></div>`;
-  }).join('');
-  const total = state.attempts.length;
-  const successes = state.attempts.filter(attempt => attempt.success).length;
-  panel.innerHTML = `<h2 class="section-title">Finale Auswertung</h2><p class="analysis-note">${successes} von ${total} Up & Downs geschafft.</p><div class="analysis-grid">${rows}</div><p class="analysis-note">Die Übersicht zeigt, mit welchen Schlägern du am stärksten warst und welche Schläger du gezielt üben solltest.</p>`;
+  }).join('') || '<p class="analysis-note">Kein Glücksrad-Schlag in dieser Runde.</p>';
+  const quote = missed.length ? Math.round(successes / missed.length * 100) : 0;
+  panel.innerHTML = `<h2 class="section-title">Finale Auswertung</h2><p class="analysis-note">${greenHits().length} Grüns getroffen · ${missed.length} Grüns verfehlt · ${successes}/${missed.length} Up & Downs geschafft · ${quote}% Quote</p><div class="analysis-grid">${rows}</div><p class="analysis-note">Die Schlägerauswertung zeigt nur Löcher mit verfehltem Grün. Die Übersicht zeigt, welche Schläger am stärksten waren und welche du gezielt üben solltest.</p>`;
+}
+function recordGreenHit() {
+  if (isRoundComplete()) {
+    alert('Die Runde ist bereits abgeschlossen. Starte eine neue Runde, wenn du weiter testen möchtest.');
+    return;
+  }
+  state.attempts.push({ nr: state.attempts.length + 1, type: 'green-hit', club: '', success: true });
+  state.selectedClub = '';
+  saveState();
+  renderTracker();
 }
 function recordAttempt(success) {
   if (isRoundComplete()) {
@@ -442,7 +473,7 @@ function recordAttempt(success) {
     alert('Bitte zuerst das Rad drehen.');
     return;
   }
-  state.attempts.push({ nr: state.attempts.length + 1, club: state.selectedClub, success });
+  state.attempts.push({ nr: state.attempts.length + 1, type: 'missed-green', club: state.selectedClub, success });
   state.selectedClub = '';
   saveState();
   renderTracker();
@@ -497,6 +528,7 @@ function render() {
 }
 
 document.getElementById('spinBtn').onclick = spinWheel;
+document.getElementById('greenHitBtn').onclick = recordGreenHit;
 document.getElementById('successBtn').onclick = () => recordAttempt(true);
 document.getElementById('missBtn').onclick = () => recordAttempt(false);
 document.getElementById('resetBtn').onclick = resetRound;
