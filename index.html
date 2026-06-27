@@ -203,13 +203,298 @@
     .scorecard-status { font-size:11px; }
     .analysis-row { grid-template-columns:minmax(72px,1fr) 48px 46px; gap:6px; font-size:12px; }
   }
+
+
+  /* ScorePal shared layout standard */
+  details.rules {
+    background: var(--white);
+    border: 2px solid var(--black);
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 var(--black);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  details.rules summary {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--black);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 13px;
+    line-height: 1.2;
+  }
+  details.rules ul,
+  details.rules ol {
+    padding-left: 20px;
+    margin: 10px 0 0;
+  }
+  details.rules li {
+    font-size: 13px;
+    margin: 5px 0;
+    line-height: 1.35;
+  }
+  header #resetBtn,
+  .header-actions #resetBtn {
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .scoreboard {
+    background: var(--brand);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+  .score-tile {
+    background: rgba(255,255,255,0.12);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .score-name,
+  .score-label {
+    color: inherit;
+  }
+  .score-label {
+    opacity: .82;
+  }
+  .hole-card,
+  .panel,
+  .setup-card,
+  .result-panel,
+  .tracker-panel,
+  .history-panel,
+  .final-panel,
+  .bingo-card {
+    border-radius: 8px;
+    box-shadow: 4px 4px 0 var(--black);
+  }
+  @media (max-width: 640px) {
+    header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .header-actions {
+      align-self: flex-start;
+      margin-top: 8px;
+    }
+    header #resetBtn,
+    .header-actions #resetBtn {
+      width: auto;
+      max-width: 100%;
+      padding: 10px 18px;
+      font-size: 13px;
+      min-height: 44px;
+    }
+  }
+
+
+
+  /* ScorePal shared header and status standard */
+  .brand-tag,
+  .brand-kicker {
+    display: block;
+    color: var(--brand);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+  .brand-title,
+  header h1.brand-title {
+    display: block;
+    font-family: "Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: .98;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+  .brand-sub {
+    display: block;
+    color: var(--brand);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.25;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+  .course-status.error,
+  .course-validation.error,
+  .validation-error {
+    color: var(--warning);
+  }
+  .score-label,
+  .score-tile .muted,
+  .score-tile .score-label {
+    color: var(--white);
+    opacity: .9;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .hole-meta,
+  .hole-subline {
+    margin-top: 12px;
+    color: var(--brand);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    line-height: 1.35;
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--black);
+    color: var(--white);
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-top: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+  @media (max-width: 640px) {
+    .brand-title,
+    header h1.brand-title {
+      font-size: 34px;
+    }
+    .brand-sub {
+      margin-top: 8px;
+    }
+  }
+
+
+
+  /* ScorePal shared final winner standard */
+  .final-banner {
+    background: var(--black);
+    color: var(--white);
+    padding: 18px;
+    border-radius: 8px;
+    margin: 16px 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .final-banner.complete {
+    background: var(--brand);
+    border: 3px solid var(--black);
+    box-shadow: 5px 5px 0 var(--black);
+  }
+  .final-banner h3 {
+    position: relative;
+    z-index: 1;
+    font-family: "Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif;
+    font-size: 42px;
+    line-height: 1;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+  .winner-card {
+    position: relative;
+    z-index: 1;
+    margin: 10px auto 0;
+    max-width: 620px;
+    padding: 20px 14px;
+    background: var(--black);
+    color: var(--white);
+    border-radius: 6px;
+    text-align: center;
+  }
+  .winner-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .winner-name,
+  .winner-title {
+    display: block;
+    font-family: "Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif;
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--white);
+  }
+  .winner-points {
+    display: block;
+    font-family: "Bahnschrift Condensed", Bahnschrift, "Arial Narrow", Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-top: 10px;
+    color: var(--white);
+  }
+  .fireworks { position: absolute; inset: 0; pointer-events: none; }
+  .firework {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--white);
+    box-shadow: 0 -18px 0 var(--white), 13px -13px 0 var(--black), 18px 0 0 var(--white), 13px 13px 0 var(--black), 0 18px 0 var(--white), -13px 13px 0 var(--black), -18px 0 0 var(--white), -13px -13px 0 var(--black);
+    animation: pop 1.4s ease-in-out infinite;
+    opacity: .8;
+  }
+  .firework.one { left: 12%; top: 22%; }
+  .firework.two { right: 13%; top: 18%; animation-delay: .35s; }
+  .firework.three { left: 50%; bottom: 18%; animation-delay: .7s; }
+  @keyframes pop { 0%,100% { transform: scale(.8); opacity:.55; } 50% { transform: scale(1.25); opacity:1; } }
+  @media (max-width: 640px) {
+    .final-banner { padding: 16px 10px; }
+    .final-banner h3 { font-size: 32px; }
+    .winner-name,
+    .winner-title { font-size: 44px; }
+    .winner-points { font-size: 24px; }
+  }
+
+
+
+  /* ScorePal shared hole header separation */
+  .hole-header {
+    align-items: flex-start;
+  }
+  .hole-context {
+    margin-top: -2px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 2px dashed var(--field);
+  }
+  .hole-header + .hole-context {
+    margin-top: -2px;
+  }
+  .hole-header.has-context {
+    border-bottom: 0;
+    margin-bottom: 0;
+  }
+  .hole-context .hole-meta {
+    margin-top: 6px;
+  }
+
 </style>
 </head>
 <body>
 <div class="container">
   <header>
     <div>
-      <div class="brand-kicker">ScorePal Scoringboard</div>
+      <div class="brand-kicker">ScorePal Scoring Board</div>
       <h1 class="brand-title">Das Glücksrad</h1>
       <span class="brand-sub">Einzel · 9 oder 18 Loch · Annäherungs-Challenge</span>
     </div>
